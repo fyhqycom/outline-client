@@ -39,7 +39,10 @@ function quitApplication() {
 
 var globalId = 100;  // Internal, incremental ID.
 
-// This must be kept in sync with ErrorCode in ../www/model/errors.ts.
+// This must be kept in sync with:
+//  - cordova-plugin-outline/apple/src/OutlineVpn.swift#ErrorCode
+//  - cordova-plugin-outline/apple/vpn/PacketTunnelProvider.h#NS_ENUM
+//  - www/model/errors.ts
 const ERROR_CODE = {
   NO_ERROR: 0,
   UNEXPECTED: 1,
@@ -49,9 +52,15 @@ const ERROR_CODE = {
   SERVER_UNREACHABLE: 5,
   VPN_START_FAILURE: 6,
   ILLEGAL_SERVER_CONFIGURATION: 7,
-  SHADOWSOCKS_START_FAILURE: 8
+  SHADOWSOCKS_START_FAILURE: 8,
+  CONFIGURE_SYSTEM_PROXY_FAILURE: 9,
+  NO_ADMIN_PERMISSIONS: 10,
+  UNSUPPORTED_ROUTING_TABLE: 11,
+  SYSTEM_MISCONFIGURED: 12
 };
 
+// This must be kept in sync with the TypeScript definition:
+//   www/model/errors.ts
 function OutlinePluginError(errorCode) {
   this.errorCode = errorCode || ERROR_CODE.UNEXPECTED;
 }

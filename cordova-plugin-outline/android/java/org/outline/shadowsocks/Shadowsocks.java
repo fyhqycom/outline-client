@@ -15,6 +15,7 @@
 package org.outline.shadowsocks;
 
 import android.content.Context;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONException;
@@ -27,6 +28,7 @@ public class Shadowsocks {
   private static final int PROCESS_START_WAIT_MS = 250;
   public static final String LOCAL_SERVER_ADDRESS = "127.0.0.1";
   public static final String LOCAL_SERVER_PORT = "9999";
+  public static final int SS_LOCAL_TIMEOUT_SECS = Integer.MAX_VALUE;
 
   private final String ssPath;
   private Process ssProcess;
@@ -34,14 +36,14 @@ public class Shadowsocks {
   public Shadowsocks(final Context context) {
     final String nativeLibraryDir =
         context.getApplicationContext().getApplicationInfo().nativeLibraryDir;
-    this.ssPath = String.format("%s/%s", nativeLibraryDir, LIB_SS_LOCAL_NAME);
+    this.ssPath = String.format(Locale.ROOT, "%s/%s", nativeLibraryDir, LIB_SS_LOCAL_NAME);
   }
 
   // Launches ss-local as a separate process with the provided configuration.
-  public boolean start(JSONObject serverConfig) throws JSONException {
+  public synchronized boolean start(JSONObject serverConfig) throws JSONException {
     LOG.info("starting ss-local");
     try {
-      this.stop();  // Try to stop in case there is a previous instance running.
+      this.stopShadowsocksProcess(); // Try to stop in case there is a previous instance running.
       this.ssProcess = new ProcessBuilder(
         this.ssPath,
         "-s", serverConfig.getString("host"),
@@ -50,6 +52,7 @@ public class Shadowsocks {
         "-b", LOCAL_SERVER_ADDRESS,
         "-l", LOCAL_SERVER_PORT,
         "-m", serverConfig.getString("method"),
+        "-t", String.format(Locale.ROOT, "%d", SS_LOCAL_TIMEOUT_SECS),
         "-u"
         ).start();
       // Wait for the process to start and report whether it is running.
@@ -61,7 +64,11 @@ public class Shadowsocks {
     return false;
   }
 
-  public void stop() {
+  public synchronized void stop() {
+    stopShadowsocksProcess();
+  }
+
+  private void stopShadowsocksProcess() {
     if (this.ssProcess != null) {
       LOG.info("stopping ss-local");
       this.ssProcess.destroy();
@@ -71,11 +78,11 @@ public class Shadowsocks {
 
   // Returns the IP address and port on which ss-local is listening. Throws an exception if ss-local
   // has not been started.
-  public String getLocalServerAddress() throws IllegalStateException {
+  public synchronized String getLocalServerAddress() throws IllegalStateException {
     if (this.ssProcess == null) {
       throw new IllegalStateException("ss-local has not been started");
     }
-    return String.format("%s:%s", LOCAL_SERVER_ADDRESS, LOCAL_SERVER_PORT);
+    return String.format(Locale.ROOT, "%s:%s", LOCAL_SERVER_ADDRESS, LOCAL_SERVER_PORT);
   }
 
   // Returns whether |process| is running.

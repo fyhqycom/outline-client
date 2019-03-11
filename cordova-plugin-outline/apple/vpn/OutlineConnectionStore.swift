@@ -21,11 +21,11 @@ import CocoaLumberjackSwift
 class OutlineConnectionStore: NSObject {
   private static let kConnectionStoreKey = "connectionStore"
   private static let kConnectionStatusKey = "connectionStatus"
+  private static let kUdpSupportKey = "udpSupport"
 
   private let defaults: UserDefaults?
 
-  // Constructs the store by creating a directory at |storeDirectoryUrl| if it does not exist.
-  // The caller is responsible for ensuring the path is writable.
+  // Constructs the store with UserDefaults as the storage.
   required init(appGroup: String) {
     defaults = UserDefaults(suiteName: appGroup)
     super.init()
@@ -57,6 +57,15 @@ class OutlineConnectionStore: NSObject {
     }
     set(newStatus) {
       defaults?.set(newStatus.rawValue, forKey: OutlineConnectionStore.kConnectionStatusKey)
+    }
+  }
+
+  var isUdpSupported: Bool {
+    get {
+      return defaults?.bool(forKey: OutlineConnectionStore.kUdpSupportKey) ?? false
+    }
+    set(udpSupport) {
+      defaults?.set(udpSupport, forKey: OutlineConnectionStore.kUdpSupportKey)
     }
   }
 }

@@ -22,6 +22,10 @@ extern const DDLogLevel ddLogLevel;
 
 @interface PacketTunnelProvider : NEPacketTunnelProvider
 
+// This must be kept in sync with:
+//  - cordova-plugin-outline/apple/src/OutlineVpn.swift#ErrorCode
+//  - cordova-plugin-outline/outlinePlugin.js#ERROR_CODE
+//  - www/model/errors.ts
 typedef NS_ENUM(NSInteger, ErrorCode) {
   noError = 0,
   undefinedError = 1,
@@ -31,7 +35,11 @@ typedef NS_ENUM(NSInteger, ErrorCode) {
   serverUnreachable = 5,
   vpnStartFailure = 6,
   illegalServerConfiguration = 7,
-  shadowsocksStartFailure = 8
+  shadowsocksStartFailure = 8,
+  configureSystemProxyFailure = 9,
+  noAdminPermissions = 10,
+  unsupportedRoutingTable = 11,
+  systemMisconfigured = 12
 };
 
 @end
